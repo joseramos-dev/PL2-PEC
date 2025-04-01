@@ -1,0 +1,71 @@
+-- funciones paso por referencia
+
+
+procedure testCase08 () is
+
+type Tpersona is record
+	dni: Integer;
+	edad: Integer;
+end record;
+
+type Tjefe is record
+	dni: Integer;
+	edad: Integer;
+	trabajador: Tpersona;
+end record;
+
+type Tempresa is record
+	boss: Tjefe;
+	numero: Integer;
+	cerrada: Boolean;
+end record;
+
+z: Integer;
+p: Tpersona;
+j: Tjefe;
+e: Tempresa;
+a,b: Integer;
+
+
+
+
+function resta (x,y:  Integer) return Integer is
+
+begin
+	
+	x := 5;
+	return x-y;	
+
+end resta;
+
+function resta2 (x, y: out Integer; c: out Boolean) return Integer is
+
+begin
+	
+	c := True;
+	return x-y;	
+
+end resta2;
+
+procedure proce (x,y:  Integer) is
+
+begin
+	
+	x := 5;
+	return x-y;	
+
+end proce;
+
+
+begin
+
+	p.dni :=123;
+	p.edad :=23;
+	j.trabajador := p;
+	e.boss := j;
+	z := e.boss.trabajador.edad;
+	Put_line ("SUBPROGRAMAS FUNCIONES");
+	
+			
+
+end testCase08;

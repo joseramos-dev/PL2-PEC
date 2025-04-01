@@ -1,0 +1,16 @@
+-- funciones paso por referencia
+
+
+procedure testCase09 () is
+
+suma,x,y: Integer;
+
+
+begin
+	x :=2;
+	y :=3;
+	suma :=x-y;
+	Put_line("suma=");
+	Put_line(suma);
+
+end testCase09;

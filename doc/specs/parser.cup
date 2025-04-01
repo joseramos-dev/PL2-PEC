@@ -1,0 +1,524 @@
+package compiler.syntax;
+
+
+import java_cup.runtime.Symbol;
+import java.util.*;
+
+import es.uned.lsi.compiler.lexical.*;
+import es.uned.lsi.compiler.code.*;
+import es.uned.lsi.compiler.intermediate.*;
+import es.uned.lsi.compiler.semantic.*;
+import es.uned.lsi.compiler.semantic.symbol.*;
+import es.uned.lsi.compiler.semantic.type.*;
+import es.uned.lsi.compiler.syntax.*;
+
+import compiler.CompilerContext;
+import compiler.lexical.*;
+import compiler.syntax.nonTerminal.*;
+import compiler.semantic.symbol.*;
+import compiler.semantic.type.*;
+import compiler.intermediate.*;
+import compiler.code.*;
+
+
+action code {:
+	
+	SyntaxErrorManager   syntaxErrorManager   = CompilerContext.getSyntaxErrorManager();
+	SemanticErrorManager semanticErrorManager = CompilerContext.getSemanticErrorManager ();
+	ScopeManagerIF       scopeManager         = CompilerContext.getScopeManager ();
+	FinalCodeFactoryIF   finalCodeFactory     = CompilerContext.getFinalCodeFactory ();
+	List<QuadrupleIF> listaCadenas = new ArrayList<QuadrupleIF>();
+:}	
+
+parser code {:
+	SyntaxErrorManager syntaxErrorManager = CompilerContext.getSyntaxErrorManager();
+	
+	public void syntax_error(Symbol symbol)
+	{ 
+	    Token token = (Token) symbol.value;
+	    syntaxErrorManager.syntaxError ("Error sintactico", token);	    
+	}
+		
+	public void unrecovered_syntax_error(java_cup.runtime.Symbol symbol)
+	{	
+	    Token token = (Token) symbol.value;
+	    syntaxErrorManager.syntaxFatalError ("Error fatal", token);
+	}
+:}
+
+// TERMINALES
+
+terminal Token MULT;
+terminal Token MINUS;
+terminal Token MAYOR;
+terminal Token DISTINTO;
+terminal Token ASIGNACION;
+terminal Token ACCESO;
+terminal Token PARENTESISAP;
+terminal Token PARENTESISCIERRE;
+terminal Token DELIMCOMENTARIO;
+terminal Token DELIMCADENA;
+terminal Token DELIMLISTA;
+terminal Token DELIMPUNTOCOMA;
+terminal Token DELIMTIPO;
+terminal Token ENTERO;
+terminal Token BOOLEANO;
+terminal Token CADENACARACTERES;
+terminal Token IDENTIFICADOR;
+terminal Token CONSTANT;
+terminal Token AND;
+terminal Token PUTLINE;
+terminal Token WHILE;
+terminal Token ELSE;
+terminal Token RETURN;
+terminal Token IF;
+terminal Token PROCEDURE;
+terminal Token RECORD;
+terminal Token FUNCTION;
+terminal Token IS;
+terminal Token THEN;
+terminal Token INTEGER;
+terminal Token BOOLEAN;
+terminal Token END;
+terminal Token BEGIN;
+terminal Token LOOP;
+terminal Token OUT;
+terminal Token TYPE;
+terminal Token IDERR;
+
+
+
+
+// NO TERMINALES
+
+non terminal  			program;
+non terminal Axiom									axiom;
+non terminal Declaraciones           				declaraciones;
+non terminal Cuerpo           						cuerpo;
+non terminal DeclConstantes           				declConstantes;
+non terminal            grupoDeclaraciones1;
+non terminal DeclTipos           					declTipos;
+non terminal            grupoDeclaraciones2;
+non terminal            declVariables;
+non terminal            grupoDeclaraciones3;
+non terminal            declSubprogramas;
+non terminal Constante		           				constante;
+non terminal Literal    							literal;
+non terminal DeclTipo           					declTipo;
+non terminal DeclCampos           					declCampos;
+non terminal DeclCampo            					declCampo;
+non terminal Tipo           						tipo;
+non terminal DeclVariable           				declVariable;
+non terminal            declSubprograma;
+non terminal DeclFunction           				declFunction;
+non terminal DeclProcedimiento           			declProcedimiento;
+non terminal DeclParametros           				declParametros;
+non terminal TipoRetorno           					tipoRetorno;
+non terminal            declaracionesFunction;
+non terminal CuerpoFunction           				cuerpoFunction;
+non terminal DeclParametro           				declParametro;
+non terminal ListaParametros           				listaParametros;
+non terminal Sentencias           					sentencias;
+non terminal Sentencia           					sentencia;
+non terminal SentenciaPutLine           			sentenciaPutLine;
+non terminal SentenciaAsignacion           			sentenciaAsignacion;
+non terminal SentenciaIF           					sentenciaIf;
+non terminal SentenciaWhile           				sentenciaWhile;
+non terminal SentenciaReturn           				sentenciaReturn;
+non terminal SentenciaProcedimiento           		sentenciaProcedimiento;
+non terminal Ref           							ref;
+non terminal Expresion           					expresion;
+non terminal ExpresionAccesoRegistro            	expresionAccesoRegistro;
+non terminal Parametro           					parametro;
+non terminal ExprFuncion           					exprFuncion;
+non terminal OperadorLogico           				operadorLogico;
+non terminal OperadorRelacional           			operadorRelacional;
+non terminal OperadorAritmetico           			operadorAritmetico;
+non terminal Operando           					operando;
+non terminal ListaParametrosInvocacion           	listaParametrosInvocacion;
+
+
+
+// RELACIONES DE PRECEDENCIA Y ASOCIATIVIDAD
+
+precedence left     AND;
+precedence left     DISTINTO;
+precedence left     MAYOR;
+precedence left     MINUS;
+precedence left     MULT;
+precedence left     IDENTIFICADOR, ACCESO, PARENTESISAP, PARENTESISCIERRE;
+
+
+
+// REGLAS DE PRODUCCIÓN
+
+
+start with program;
+
+program ::= 
+  {: 
+        syntaxErrorManager.syntaxInfo ("Starting parsing..."); 
+   :}
+  axiom:ax
+  {:   		
+  		// No modificar esta estructura, aunque se pueden añadir más acciones semánticas
+  		
+  		//List intermediateCode = ax.getIntermediateCode ();
+  		//finalCodeFactory.create (intermediateCode);
+		System.out.println("Código intermedio axioma: "+ax.getIntermediateCode());
+  		// En caso de no comentarse las dos sentencias anteriores se puede generar una excepcion
+  		// en las llamadas a cupTest si el compilador no está completo. Esto es debido a que 
+  		// aún no se tendrá implementada la generación de código intermedio ni final.
+  		// Para la entrega final deberán descomentarse y usarse.
+  		
+  		syntaxErrorManager.syntaxInfo ("Parsing process ended.");
+  		
+   :};
+   
+
+
+
+axiom ::=   PROCEDURE IDENTIFICADOR:id
+			{:
+				String nombre = id.getLexema();
+				scopeManager.openScope(nombre);
+				ScopeIF scope = scopeManager.getCurrentScope();
+				TypeTableIF typeTable = scope.getTypeTable();
+				TypeSimple tsEntero = new TypeSimple(scope,"ENTERO");
+				typeTable.addType("ENTERO", tsEntero);
+				TypeSimple tsBooleano = new TypeSimple(scope,"BOOLEANO");
+				typeTable.addType("BOOLEANO",tsBooleano);
+				//crear simbolo y tipo de proceso principal
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+				TypeProcedure mainProceso = new TypeProcedure(scope,id.getLexema(),new ArrayList());
+				typeTable.addType(id.getLexema(),mainProceso);
+				tablaSimbolos.addSymbol(new SymbolProcedure(scope,id.getLexema(),mainProceso,new ArrayList()));
+			:}
+			 PARENTESISAP PARENTESISCIERRE IS 
+			declaraciones:d
+            cuerpo:c{:
+				c.comprobarIdEnd(scopeManager, semanticErrorManager);
+				RESULT = Axiom1.intermediateCode(scopeManager.getCurrentScope(),listaCadenas,d,c);
+			:};  
+            
+     
+                                
+//DECLARACIONES ----------------------------------------------------------------------------------
+declaraciones ::= declConstantes grupoDeclaraciones1 | grupoDeclaraciones1;
+grupoDeclaraciones1 ::= declTipos grupoDeclaraciones2 | grupoDeclaraciones2;
+grupoDeclaraciones2 ::= declVariables grupoDeclaraciones3 | grupoDeclaraciones3;
+grupoDeclaraciones3 ::= declSubprogramas | ;
+//-------------------------------------------------------------------------------------------------
+
+
+
+//DECLARACIÓN DE CONSTANTES -----------------------------------------------------------------------
+declConstantes ::= constante | declConstantes constante ;
+
+constante ::= IDENTIFICADOR:id DELIMTIPO CONSTANT ASIGNACION literal:lit DELIMPUNTOCOMA
+{:
+	RESULT = Constante.semantico(scopeManager, semanticErrorManager, id.getLexema(), lit);
+:};
+
+literal ::= ENTERO:e{:
+	RESULT = Literal.semantico_entero(e.getLexema());
+:} | BOOLEANO:b{:
+	RESULT = Literal.semantico_booleano(b.getLexema());
+:};
+//-------------------------------------------------------------------------------------------------
+
+
+
+//DECLARACIÓN TIPOS ESTRUCTURADOS -----------------------------------------------------------------
+declTipos ::= declTipo{:
+	RESULT = DeclTipos.semantico();
+:} | declTipos:dt declTipo:d{:
+	RESULT = DeclTipos.semantico(d);
+:} ;
+declTipo::= TYPE IDENTIFICADOR:id IS RECORD declCampos:dc END RECORD DELIMPUNTOCOMA{:
+	RESULT = DeclTipo.semantico(scopeManager, semanticErrorManager, id.getLexema(), dc);
+:};
+
+
+declCampos ::= declCampo:c{:
+	RESULT = DeclCampos.semantico_1(c);
+:} | declCampos:dc declCampo:c{:
+	RESULT = DeclCampos.semantico_2(semanticErrorManager,dc, c);
+:};
+declCampo ::= IDENTIFICADOR:id DELIMTIPO tipo:t DELIMPUNTOCOMA{:
+	RESULT = DeclCampo.semantico(scopeManager, semanticErrorManager, id.getLexema(), t.getTipo());
+:};
+//-------------------------------------------------------------------------------------------------
+
+
+
+//DECLARACIÓN VARIABLES GLOBALES ------------------------------------------------------------------
+declVariables ::= declVariable | declVariables declVariable;
+declVariable ::= IDENTIFICADOR:id DELIMTIPO tipo:tp DELIMPUNTOCOMA{:
+	RESULT = DeclVariable.semantico_1(scopeManager, id.getLexema(), semanticErrorManager, tp);
+:} | IDENTIFICADOR:id DELIMLISTA declVariable:dv{:
+	
+	RESULT = DeclVariable.semantico_2(scopeManager, id.getLexema(), semanticErrorManager, dv);
+:};
+
+tipo ::= INTEGER{:
+	RESULT = Tipo.semantico("ENTERO");
+:} | BOOLEAN{:
+	RESULT = Tipo.semantico("BOOLEANO");
+:} | IDENTIFICADOR:i{:
+	RESULT = Tipo.semantico(i.getLexema());
+:};
+//-------------------------------------------------------------------------------------------------
+
+
+
+//DECLARACIÓN SUBPROGRAMA -------------------------------------------------------------------------
+declSubprogramas ::= declSubprograma | declSubprogramas declSubprograma;
+declSubprograma ::= declFunction | declProcedimiento;
+//-------------------------------------------------------------------------------------------------
+
+
+
+//DECLARACIÓN FUNCIÓN -----------------------------------------------------------------------------
+declFunction ::= FUNCTION IDENTIFICADOR:id PARENTESISAP declParametros:dps PARENTESISCIERRE RETURN tipoRetorno:t IS{:
+						RESULT = DeclFunction.semantico_parametros(scopeManager, semanticErrorManager, id.getLexema(), dps, t.getTipo());
+					:}
+                    declaracionesFunction
+					cuerpoFunction:c{:
+						c.comprobarIdEnd(scopeManager,semanticErrorManager);
+						c.comprobarReturns(scopeManager,semanticErrorManager);
+						scopeManager.closeScope();
+					:} 	
+					| FUNCTION IDENTIFICADOR:id PARENTESISAP PARENTESISCIERRE RETURN tipoRetorno:t IS{:
+						RESULT = DeclFunction.semantico_sinParametros(scopeManager, semanticErrorManager, id.getLexema(), t.getTipo());
+					:}
+				    declaracionesFunction
+					cuerpoFunction:c{:
+						c.comprobarIdEnd(scopeManager,semanticErrorManager);
+						c.comprobarReturns(scopeManager,semanticErrorManager);
+						scopeManager.closeScope();
+					:};	
+				
+declParametros ::= declParametro:dp DELIMPUNTOCOMA declParametros:dps{:
+	RESULT = DeclParametros.semantico_1(dps, dp);
+:} | declParametro:dp{:
+	RESULT = DeclParametros.semantico_2(dp);
+:};
+declParametro ::= listaParametros:lp DELIMTIPO tipo:tp {:
+	RESULT = DeclParametro.semantico_copia(lp, tp);
+:}| listaParametros:lp DELIMTIPO OUT tipo:tp{:
+	RESULT = DeclParametro.semantico_referencia(lp, tp);
+:};
+listaParametros ::= IDENTIFICADOR:id DELIMLISTA listaParametros:lp {:
+	RESULT = ListaParametros.semantico_1(lp,id.getLexema());
+:}| IDENTIFICADOR:id{:
+	RESULT = ListaParametros.semantico_2(id.getLexema());
+:};
+
+tipoRetorno ::= INTEGER{:
+	RESULT = TipoRetorno.semantico("ENTERO");
+:} | BOOLEAN{:
+	RESULT = TipoRetorno.semantico("BOOLEANO");
+:};
+
+declaracionesFunction ::= grupoDeclaraciones1;
+
+                    
+cuerpoFunction ::=  BEGIN 
+                       sentencias:s
+                    END IDENTIFICADOR:id DELIMPUNTOCOMA{:
+						RESULT = CuerpoFunction.semantico(s, id.getLexema());
+:};
+//-------------------------------------------------------------------------------------------------
+                                     
+
+
+//DECLARACIÓN PROCEDIMIENTO -----------------------------------------------------------------------
+declProcedimiento ::= PROCEDURE IDENTIFICADOR:id PARENTESISAP declParametros:dp PARENTESISCIERRE IS {:
+						RESULT = DeclProcedimiento.semantico_1(scopeManager, semanticErrorManager, dp, id.getLexema());
+						:}
+                         declaracionesFunction
+                         cuerpo:c{:
+							c.comprobarIdEnd(scopeManager, semanticErrorManager);
+							scopeManager.closeScope();
+						:}
+                         | PROCEDURE IDENTIFICADOR:id PARENTESISAP PARENTESISCIERRE IS {:
+							RESULT = DeclProcedimiento.semantico_2(scopeManager, semanticErrorManager, id.getLexema());
+						:}
+                         declaracionesFunction
+                         cuerpo:c{:
+							c.comprobarIdEnd(scopeManager, semanticErrorManager);
+							scopeManager.closeScope();
+						:};
+//-------------------------------------------------------------------------------------------------
+
+
+
+//CUERPO ------------------------------------------------------------------------------------------
+                    
+cuerpo ::=  BEGIN 
+                 sentencias:s
+            END IDENTIFICADOR:id DELIMPUNTOCOMA{:
+					RESULT = Cuerpo.semantico(s, id.getLexema());
+			:} | 
+            BEGIN 
+            END IDENTIFICADOR:id DELIMPUNTOCOMA{:
+					RESULT = Cuerpo.semantico(null, id.getLexema());
+:};
+            
+//--------------------------------------------------------------------------------------------------
+           
+           
+                        
+//SENTENCIAS ---------------------------------------------------------------------------------------                       
+sentencias ::= sentencia:s sentencias:sent {:
+	RESULT = Sentencias.semantico_1(scopeManager, s, sent);
+:}
+				| sentencia:s{:
+	RESULT = Sentencias.semantico_2(scopeManager, s);
+:};
+sentencia ::= 	sentenciaPutLine:sp {:
+					RESULT = Sentencia.semantico_putline(sp,scopeManager.getCurrentScope());
+				:} | sentenciaAsignacion:sa {:
+					RESULT = Sentencia.semantico_asignacion(sa,scopeManager.getCurrentScope());
+				:} | sentenciaIf:si {:
+					RESULT = Sentencia.semantico_if(si,scopeManager.getCurrentScope());
+				:} | sentenciaWhile:sw{:
+					RESULT = Sentencia.semantico_while(sw,scopeManager.getCurrentScope());
+				:} | sentenciaReturn:sr {:
+					RESULT = Sentencia.semantico_return(sr,scopeManager.getCurrentScope());
+				:} | sentenciaProcedimiento:sp{:
+					RESULT = Sentencia.semantico_procedimiento(sp,scopeManager.getCurrentScope());
+				:};
+       
+//sentencia asignación            
+sentenciaAsignacion ::= ref:ref ASIGNACION expresion:ex DELIMPUNTOCOMA{:
+	RESULT = SentenciaAsignacion.semantico(scopeManager, semanticErrorManager, ref, ex);
+:};
+
+ref ::= IDENTIFICADOR:id{:
+	RESULT = Ref.semantico_1(scopeManager, semanticErrorManager, id.getLexema());
+:} | expresionAccesoRegistro:ear{:
+	RESULT = Ref.semantico_2(scopeManager, semanticErrorManager, ear);
+:};
+
+//sentencia if
+sentenciaIf ::= IF expresion:e THEN sentencias:s1 END IF DELIMPUNTOCOMA {:
+					RESULT = SentenciaIF.semantico(scopeManager, semanticErrorManager, e, s1,null);
+				:}
+				| IF expresion:e THEN sentencias:s1 ELSE sentencias:s2 END IF DELIMPUNTOCOMA{:
+					RESULT = SentenciaIF.semantico(scopeManager, semanticErrorManager, e, s1,s2);
+				:};
+
+//sentencia while
+sentenciaWhile ::= WHILE expresion:e LOOP sentencias:s END LOOP DELIMPUNTOCOMA{:
+	RESULT = SentenciaWhile.semantico(scopeManager,semanticErrorManager,e,s);
+:};
+
+
+//sentencia Put_line
+sentenciaPutLine ::= PUTLINE PARENTESISAP parametro:p PARENTESISCIERRE DELIMPUNTOCOMA{:
+	RESULT = SentenciaPutLine.semantico(scopeManager, semanticErrorManager, listaCadenas, p);
+:};
+parametro ::= expresion:e {:
+	RESULT = Parametro.semantico_expresion(e);
+:}| CADENACARACTERES:c {:
+	RESULT = Parametro.semantico_cadena(c.getLexema());
+:};
+
+//sentencia Return 
+sentenciaReturn ::= RETURN expresion:expr DELIMPUNTOCOMA{:
+	RESULT = SentenciaReturn.semantico(scopeManager, expr);
+:};   
+
+
+
+//sentencia llamada procedimiento
+sentenciaProcedimiento ::= exprFuncion:expr DELIMPUNTOCOMA{:
+	RESULT = SentenciaProcedimiento.semantico(expr);
+:};
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+//EXPRESIONES ---------------------------------------------------------------------------------------
+expresion ::=       expresion:ex1 operadorLogico:op expresion:ex2 {:
+						RESULT = Expresion.semantico_operadorLogico(scopeManager,semanticErrorManager,ex1,ex2,op.getTipoOperador());
+					:} | 
+                    expresion:ex1 operadorRelacional:op expresion:ex2 {:
+						RESULT = Expresion.semantico_operadorRelacional(scopeManager,semanticErrorManager,ex1,ex2,op.getTipoOperador());
+					:} | 
+                    expresion:ex1 operadorAritmetico:op expresion:ex2 {:
+						RESULT = Expresion.semantico_operadorAritmetico(scopeManager,semanticErrorManager,ex1,ex2,op.getTipoOperador());
+					:} |
+                    expresionAccesoRegistro:ear {:
+						RESULT = Expresion.semantico_expresionAccesoRegistro(scopeManager,semanticErrorManager,ear);
+					:} | exprFuncion:exf {:
+						RESULT = Expresion.semantico_exprFuncion(exf);
+					:} | operando:op {:
+						RESULT = Expresion.semantico_operando(op);
+					:}| 
+                    PARENTESISAP expresion:ex PARENTESISCIERRE {:
+						RESULT = Expresion.semantico_expresion(ex);
+					:};
+                    
+operando ::= BOOLEANO:s{:
+	RESULT = Operando.semantico_booleano(scopeManager,semanticErrorManager,s.getLexema());
+:} | IDENTIFICADOR:s {:
+	RESULT = Operando.semantico_identificador(scopeManager,semanticErrorManager,s.getLexema());
+:} | ENTERO:s {:
+	RESULT = Operando.semantico_entero(scopeManager, semanticErrorManager, s.getLexema());
+:};   
+operadorRelacional ::= DISTINTO {:
+							RESULT = OperadorRelacional.semantico("NQ");
+						:}
+						 | MAYOR{:
+							RESULT = OperadorRelacional.semantico("GR");
+						:};                           
+operadorAritmetico ::= MINUS{:
+	RESULT = OperadorAritmetico.semantico("SUB");
+:} | MULT{:
+	RESULT = OperadorAritmetico.semantico("MUL");
+:}; 
+operadorLogico ::= AND{:
+	RESULT = OperadorLogico.semantico("AND");
+:};                   
+//------------------------------------------------------------------------------------------------- 
+
+
+                                              
+//EXPRESIÓN DE ACCESO A CAMPOS DE REGISTRO --------------------------------------------------------                       
+expresionAccesoRegistro ::= IDENTIFICADOR:id1 ACCESO IDENTIFICADOR:id2{:
+	RESULT = ExpresionAccesoRegistro.semantico_1(scopeManager,semanticErrorManager,id1.getLexema(),id2.getLexema());
+:} | IDENTIFICADOR:id ACCESO expresionAccesoRegistro:ear{:
+	RESULT = ExpresionAccesoRegistro.semantico_2(scopeManager,semanticErrorManager,id.getLexema(),ear);
+:}; 
+//------------------------------------------------------------------------------------------------- 
+
+
+
+//INVOCACIÓN DE FUNCIONES -------------------------------------------------------------------------                  
+exprFuncion ::= IDENTIFICADOR:id PARENTESISAP listaParametrosInvocacion:lpi PARENTESISCIERRE {:
+	RESULT = ExprFuncion.semantico(scopeManager, semanticErrorManager, lpi, id.getLexema());
+:} | IDENTIFICADOR:id PARENTESISAP PARENTESISCIERRE{:
+	RESULT = ExprFuncion.semantico(scopeManager, semanticErrorManager, new ListaParametrosInvocacion(), id.getLexema());
+:};  
+
+       
+listaParametrosInvocacion ::= expresion:e{:
+	RESULT = ListaParametrosInvocacion.semantico_1(e.getTipo());
+:} | expresion:e DELIMLISTA listaParametrosInvocacion:lpi{:
+	RESULT = ListaParametrosInvocacion.semantico_2(e.getTipo(),lpi);
+:};     
+
+//------------------------------------------------------------------------------------------------- 
+
+
+
+
+
+
+
+            
+                    
