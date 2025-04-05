@@ -99,8 +99,8 @@
 	
 	<!-- Final Test -->
 	<target name="finalTest" depends="build"> 		
-		<java classpath="${classpath}" classname="compiler.test.FinalTestCase" fork="true">			
-			<arg file="${test-file}"/>			
+		<java classpath="${classpath}" classname="compiler.test.FinalTestCase" fork="true" >		
+			<arg file="${test-file}"/>	
 		</java>		
 	</target>  
 

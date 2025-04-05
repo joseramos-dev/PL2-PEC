@@ -101,7 +101,7 @@ non terminal DeclTipos           					declTipos;
 non terminal            grupoDeclaraciones2;
 non terminal            declVariables;
 non terminal            grupoDeclaraciones3;
-non terminal            declSubprogramas;
+non terminal DeclSubprogramas           			declSubprogramas;
 non terminal Constante		           				constante;
 non terminal Literal    							literal;
 non terminal DeclTipo           					declTipo;
@@ -109,7 +109,7 @@ non terminal DeclCampos           					declCampos;
 non terminal DeclCampo            					declCampo;
 non terminal Tipo           						tipo;
 non terminal DeclVariable           				declVariable;
-non terminal            declSubprograma;
+non terminal DeclSubprograma           				declSubprograma;
 non terminal DeclFunction           				declFunction;
 non terminal DeclProcedimiento           			declProcedimiento;
 non terminal DeclParametros           				declParametros;
@@ -161,17 +161,7 @@ program ::=
    :}
   axiom:ax
   {:   		
-  		// No modificar esta estructura, aunque se pueden añadir más acciones semánticas
-  		
-  		//List intermediateCode = ax.getIntermediateCode ();
-  		//finalCodeFactory.create (intermediateCode);
-		System.out.println("Código intermedio axioma: "+ax.getIntermediateCode());
-  		// En caso de no comentarse las dos sentencias anteriores se puede generar una excepcion
-  		// en las llamadas a cupTest si el compilador no está completo. Esto es debido a que 
-  		// aún no se tendrá implementada la generación de código intermedio ni final.
-  		// Para la entrega final deberán descomentarse y usarse.
-  		
-  		syntaxErrorManager.syntaxInfo ("Parsing process ended.");
+  		Axiom.codigoFinal(scopeManager, finalCodeFactory, syntaxErrorManager, ax);
   		
    :};
    
@@ -273,8 +263,17 @@ tipo ::= INTEGER{:
 
 
 //DECLARACIÓN SUBPROGRAMA -------------------------------------------------------------------------
-declSubprogramas ::= declSubprograma | declSubprogramas declSubprograma;
-declSubprograma ::= declFunction | declProcedimiento;
+declSubprogramas ::= declSubprograma {:
+							RESULT = new DeclSubprogramas();
+					:} | declSubprogramas declSubprograma {:
+							RESULT = new DeclSubprogramas();
+					:};
+declSubprograma ::= declFunction {:
+						RESULT = new DeclSubprograma();
+					:}
+					| declProcedimiento{:
+						RESULT = new DeclSubprograma();
+					:};
 //-------------------------------------------------------------------------------------------------
 
 
@@ -507,9 +506,9 @@ exprFuncion ::= IDENTIFICADOR:id PARENTESISAP listaParametrosInvocacion:lpi PARE
 
        
 listaParametrosInvocacion ::= expresion:e{:
-	RESULT = ListaParametrosInvocacion.semantico_1(e.getTipo());
+	RESULT = ListaParametrosInvocacion.semantico_1(scopeManager.getCurrentScope(),e);
 :} | expresion:e DELIMLISTA listaParametrosInvocacion:lpi{:
-	RESULT = ListaParametrosInvocacion.semantico_2(e.getTipo(),lpi);
+	RESULT = ListaParametrosInvocacion.semantico_2(scopeManager.getCurrentScope(),e,lpi);
 :};     
 
 //------------------------------------------------------------------------------------------------- 

@@ -80,7 +80,7 @@ public class TypeRecord
 	public int getPosCampo(String idCampo) {
 		int i=0;
 		for(String s: campos.keySet()) {
-			if(idCampo == s) {
+			if(idCampo.equals(s)) {
 				return i;
 			}
 			i++;

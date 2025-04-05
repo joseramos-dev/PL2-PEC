@@ -54,7 +54,14 @@ public class Operando extends NonTerminal{
 		TemporalFactory tf = new TemporalFactory(scope);
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		TemporalIF temp = tf.create();
-		Value valor = new Value(s);
+		Value valor = null;
+		if(s.equals("True")) {
+			valor = new Value(1);
+		}else if(s.equals("False")) {
+			valor = new Value(0);
+		}else {
+			sm.semanticFatalError("[Operando] - el valor booleano introducido ("+s+") no es valido ");
+		}
 		cb.addQuadruple("MV",temp,valor);
 		o.setTemporal(temp);
 		o.setIntermediateCode(cb.create());

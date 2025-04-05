@@ -13,21 +13,9 @@ public class Temporal
     private String  name    = null;
     private ScopeIF scope   = null;
     private int     address = 0;
-           
-    /**
-     * Constructor for Temporal.
-     * @param name The name.
-     * @param scope The creation scope.
-     */
-    public Temporal (String name, 
-                     ScopeIF scope)
-    {
-        super ();
-        this.name = name;
-        this.scope = scope;
-    }
     
-    
+    private int size = 1;
+
     /**
      * Constructor for Temporal.
      * @param name The name.
@@ -38,7 +26,9 @@ public class Temporal
                      ScopeIF scope,
                      int address)
     {
-        this (name, scope);
+    	super ();
+        this.name = name;
+        this.scope = scope;
         this.address = address;
     }
 
@@ -127,4 +117,16 @@ public class Temporal
     {        
         return name;
     }
+
+
+	public int getSize() {
+		return size;
+	}
+
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+    
+    
 }

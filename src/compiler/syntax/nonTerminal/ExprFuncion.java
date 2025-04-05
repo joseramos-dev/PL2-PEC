@@ -6,6 +6,11 @@ import compiler.semantic.symbol.SymbolProcedure;
 import compiler.semantic.symbol.SymbolVariable;
 import compiler.semantic.type.TypeFunction;
 import compiler.semantic.type.TypeProcedure;
+import es.uned.lsi.compiler.intermediate.IntermediateCodeBuilder;
+import es.uned.lsi.compiler.intermediate.LabelFactory;
+import es.uned.lsi.compiler.intermediate.LabelIF;
+import es.uned.lsi.compiler.intermediate.TemporalFactory;
+import es.uned.lsi.compiler.intermediate.TemporalIF;
 import es.uned.lsi.compiler.semantic.ScopeIF;
 import es.uned.lsi.compiler.semantic.ScopeManagerIF;
 import es.uned.lsi.compiler.semantic.SemanticErrorManager;
@@ -50,7 +55,8 @@ public class ExprFuncion extends NonTerminal{
 			sm.semanticFatalError("[ExprFuncion] - La función con identificador "+id+" no existe");
 		}
 		
-		return funcion;
+		
+		return codigoIntermedio(scopeManager, funcion, lpi, id);
 	}
 	
 	private static ExprFuncion funcion(
@@ -64,7 +70,7 @@ public class ExprFuncion extends NonTerminal{
 		
 		// comprobamos nº parametros es igual
 		if(lpi.getNumeroParametros() != type.getListaParametros().size()) {
-			sm.semanticFatalError("[ExprFuncion] - Se ha intentado ejecutar el comando "+type.getName()+" con un número de parametros inadecuado");
+			sm.semanticFatalError("[ExprFuncion] - Se ha intentado ejecutar el comando "+type.getName()+" con un número de parametros inadecuado. Numero parametros = "+lpi.getNumeroParametros()+".  Número esperado = "+type.getListaParametros().size());
 		}
 		//comprobamos tipo de variables usadas (lpi) es igual al requerido por el procedimiento
 		//si se pasa por valor que sea entero/booleano(typeSimple), y si se pasa por referencia entero/booleano/record(typeSimple o TypeRecord)
@@ -93,7 +99,7 @@ public class ExprFuncion extends NonTerminal{
 			) {
 		// comprobamos nº parametros es igual
 		if(lpi.getNumeroParametros() != type.getListaParametros().size()) {
-			sm.semanticFatalError("[ExprFuncion] - Se ha intentado ejecutar el comando "+type.getName()+" con un número de parametros inadecuado");
+			sm.semanticFatalError("[ExprFuncion] - Se ha intentado ejecutar el comando "+type.getName()+" con un número de parametros inadecuado. Numero parametros = "+lpi.getNumeroParametros()+".  Número esperado = "+type.getListaParametros().size());
 		}
 		//comprobamos tipo de variables usadas (lpi) es igual al requerido por el procedimiento
 		//si se pasa por valor que sea entero/booleano, y si se pasa por referencia entero/booleano/record
@@ -111,6 +117,31 @@ public class ExprFuncion extends NonTerminal{
 		}
 		funcion.setProcedimiento(true);
 		return funcion;
+	}
+	
+	//CODIGO INTERMEDIO
+	private static ExprFuncion codigoIntermedio(
+				ScopeManagerIF scopeManager,
+				ExprFuncion exp,
+				ListaParametrosInvocacion pa,
+				String id
+			) {
+		ScopeIF scope = scopeManager.getCurrentScope();
+		TemporalFactory tf = new TemporalFactory(scope);
+		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+		TemporalIF temp = tf.create();
+		cb.addQuadruple("STARTSUBPROGRAMA");
+		cb.addQuadruples(pa.getIntermediateCode());
+		LabelFactory lf = new LabelFactory();
+		LabelIF l1 = lf.create(id);
+		cb.addQuadruple("CALL",l1);
+		SymbolIF simbolo = scopeManager.searchSymbol(id);
+		if(simbolo instanceof SymbolFunction) {
+			cb.addQuadruple("VALORRETORNO", temp);
+		}
+		exp.setIntermediateCode(cb.create());
+		exp.setTemporal(temp);
+		return exp;		
 	}
 	
 

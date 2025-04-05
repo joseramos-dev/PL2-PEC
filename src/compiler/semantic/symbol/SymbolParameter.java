@@ -16,6 +16,7 @@ public class SymbolParameter
 {  
 	
 	private boolean referencia;
+	private int address ;
    
     /**
      * Constructor for SymbolParameter.
@@ -39,6 +40,15 @@ public class SymbolParameter
 	public void setReferencia(boolean referencia) {
 		this.referencia = referencia;
 	}
+
+	public int getAddress() {
+		return address;
+	}
+
+	public void setAddress(int address) {
+		this.address = address;
+	}
     
+	
     
 }

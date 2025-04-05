@@ -26,7 +26,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sp.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 	}
 
@@ -36,7 +35,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sa.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 	}
 
@@ -48,7 +46,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sif.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 	}
 
@@ -59,7 +56,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sw.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 	}
 
@@ -71,7 +67,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sr.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 
 	}
@@ -82,7 +77,6 @@ public class Sentencia extends NonTerminal {
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 		cb.addQuadruples(sp.getIntermediateCode());
 		sentencia.setIntermediateCode(cb.create());
-		System.out.println("[Sentencia] Código intermedio : "+sentencia.getIntermediateCode());
 		return sentencia;
 	}
 

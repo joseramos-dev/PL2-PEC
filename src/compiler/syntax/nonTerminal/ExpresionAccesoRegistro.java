@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import compiler.intermediate.Variable;
+import compiler.semantic.symbol.SymbolVariable;
 import compiler.semantic.type.TypeRecord;
 import es.uned.lsi.compiler.intermediate.IntermediateCodeBuilder;
 import es.uned.lsi.compiler.intermediate.TemporalFactory;
