@@ -1,11 +1,13 @@
 package compiler.syntax.nonTerminal;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import compiler.CompilerContext;
 import compiler.intermediate.Temporal;
 import compiler.intermediate.Variable;
+import compiler.semantic.symbol.SymbolParameter;
 import compiler.semantic.symbol.SymbolVariable;
 import es.uned.lsi.compiler.code.FinalCodeFactoryIF;
 import es.uned.lsi.compiler.intermediate.IntermediateCodeBuilder;
@@ -42,6 +44,15 @@ public abstract class Axiom
     		int direccionRA = 4;
     		List<SymbolIF> simbolos = scope.getSymbolTable().getSymbols();
     		for(SymbolIF simbolo:simbolos) {
+    			if(simbolo instanceof SymbolParameter) {
+    				((SymbolParameter)simbolo).setAddress(direccionRA);
+    				direccionRA = direccionRA + simbolo.getType().getSize();
+    			}
+    		}
+    		if(scope.getLevel()!=0) {
+    			direccionRA = direccionRA +1;
+    		}
+    		for(SymbolIF simbolo:simbolos) {
     			if(simbolo instanceof SymbolVariable) {
     				((SymbolVariable)simbolo).setAddress(direccionRA);
     				direccionRA = direccionRA + simbolo.getType().getSize();
@@ -77,14 +88,42 @@ public abstract class Axiom
 			cb.addQuadruples(ax.getIntermediateCode());
 			ax.setIntermediateCode(cb.create());
     	}
-    	List intermediateCode = ax.getIntermediateCode ();
+    	List intermediateCode = colocarSubprogramasAlFinal(ax.getIntermediateCode ());
 		finalCodeFactory.setEnvironment(CompilerContext.getExecutionEnvironment());
   		finalCodeFactory.create(intermediateCode);
-		mostrarIntermediateCode(ax.getIntermediateCode()); 		
+		mostrarIntermediateCode(intermediateCode); 		
   		syntaxErrorManager.syntaxInfo ("Parsing process ended.");
     }
     
-    public static void mostrarIntermediateCode(List<QuadrupleIF> lista) {
+    private static List<QuadrupleIF> colocarSubprogramasAlFinal(List<QuadrupleIF> intermediateCode) {
+    	ArrayList<QuadrupleIF> programa = new ArrayList();
+    	ArrayList<QuadrupleIF> subprograma = new ArrayList();
+    	boolean mainPrograma = true;
+    	for(QuadrupleIF q: intermediateCode) {
+    		String operacion = q.getOperation();
+    		if(mainPrograma) {
+    			if(operacion.equals("ETIQUETA")) {
+    				subprograma.add(q);
+    				mainPrograma = false;
+    			}else {
+    				programa.add(q);
+    			}
+    			
+    		}else {
+    			if(operacion.equals("FINSUBPROGRAMA")) {
+    				subprograma.add(q);
+    				mainPrograma = true;
+    			}else {
+    				subprograma.add(q);
+    			}
+    		}
+    	}
+    	programa.addAll(subprograma);
+    	return programa;
+    	
+    }
+    
+    private static void mostrarIntermediateCode(List<QuadrupleIF> lista) {
     	System.out.println("CÓDIGO INTERMEDIO:");  
     	for(QuadrupleIF q : lista) {
     		System.out.println(q);

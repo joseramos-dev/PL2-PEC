@@ -96,11 +96,11 @@ non terminal Axiom									axiom;
 non terminal Declaraciones           				declaraciones;
 non terminal Cuerpo           						cuerpo;
 non terminal DeclConstantes           				declConstantes;
-non terminal            grupoDeclaraciones1;
+non terminal GrupoDeclaraciones1           			grupoDeclaraciones1;
 non terminal DeclTipos           					declTipos;
-non terminal            grupoDeclaraciones2;
-non terminal            declVariables;
-non terminal            grupoDeclaraciones3;
+non terminal GrupoDeclaraciones2       				grupoDeclaraciones2;
+non terminal DeclVariables           				declVariables;
+non terminal GrupoDeclaraciones3           			grupoDeclaraciones3;
 non terminal DeclSubprogramas           			declSubprogramas;
 non terminal Constante		           				constante;
 non terminal Literal    							literal;
@@ -114,7 +114,7 @@ non terminal DeclFunction           				declFunction;
 non terminal DeclProcedimiento           			declProcedimiento;
 non terminal DeclParametros           				declParametros;
 non terminal TipoRetorno           					tipoRetorno;
-non terminal            declaracionesFunction;
+non terminal DeclaracionesFunction           		declaracionesFunction;
 non terminal CuerpoFunction           				cuerpoFunction;
 non terminal DeclParametro           				declParametro;
 non terminal ListaParametros           				listaParametros;
@@ -194,10 +194,25 @@ axiom ::=   PROCEDURE IDENTIFICADOR:id
      
                                 
 //DECLARACIONES ----------------------------------------------------------------------------------
-declaraciones ::= declConstantes grupoDeclaraciones1 | grupoDeclaraciones1;
-grupoDeclaraciones1 ::= declTipos grupoDeclaraciones2 | grupoDeclaraciones2;
-grupoDeclaraciones2 ::= declVariables grupoDeclaraciones3 | grupoDeclaraciones3;
-grupoDeclaraciones3 ::= declSubprogramas | ;
+declaraciones ::= declConstantes:dc grupoDeclaraciones1:gd1 {:
+						RESULT = Declaraciones.semantico_1(scopeManager.getCurrentScope(),dc,gd1);
+				:}| grupoDeclaraciones1:gd1 {:
+						RESULT = Declaraciones.semantico_2(scopeManager.getCurrentScope(),gd1);
+				:};
+grupoDeclaraciones1 ::= declTipos:dt grupoDeclaraciones2:gd2 {:
+						RESULT = GrupoDeclaraciones1.semantico_1(scopeManager.getCurrentScope(),dt,gd2);
+					:} | grupoDeclaraciones2:gd2 {:
+						RESULT = GrupoDeclaraciones1.semantico_2(scopeManager.getCurrentScope(),gd2);
+					:};
+grupoDeclaraciones2 ::= declVariables:dv grupoDeclaraciones3:gd3{:
+						RESULT = GrupoDeclaraciones2.semantico_1(scopeManager.getCurrentScope(),dv,gd3);
+					:} | grupoDeclaraciones3:gd3{:
+						RESULT = GrupoDeclaraciones2.semantico_2(scopeManager.getCurrentScope(),gd3);
+					:};
+grupoDeclaraciones3 ::= declSubprogramas:ds {:
+						RESULT = GrupoDeclaraciones3.semantico(scopeManager.getCurrentScope(), ds);
+					:}
+					| {:RESULT = new GrupoDeclaraciones3(); :};
 //-------------------------------------------------------------------------------------------------
 
 
@@ -243,7 +258,11 @@ declCampo ::= IDENTIFICADOR:id DELIMTIPO tipo:t DELIMPUNTOCOMA{:
 
 
 //DECLARACIÓN VARIABLES GLOBALES ------------------------------------------------------------------
-declVariables ::= declVariable | declVariables declVariable;
+declVariables ::= declVariable:d{:
+						RESULT = DeclVariables.semantico_1(d);
+				:} | declVariables:dv declVariable:d {:
+						RESULT = DeclVariables.semantico_2(dv,d);
+				:};
 declVariable ::= IDENTIFICADOR:id DELIMTIPO tipo:tp DELIMPUNTOCOMA{:
 	RESULT = DeclVariable.semantico_1(scopeManager, id.getLexema(), semanticErrorManager, tp);
 :} | IDENTIFICADOR:id DELIMLISTA declVariable:dv{:
@@ -263,16 +282,16 @@ tipo ::= INTEGER{:
 
 
 //DECLARACIÓN SUBPROGRAMA -------------------------------------------------------------------------
-declSubprogramas ::= declSubprograma {:
-							RESULT = new DeclSubprogramas();
-					:} | declSubprogramas declSubprograma {:
-							RESULT = new DeclSubprogramas();
+declSubprogramas ::= declSubprograma:d {:
+							RESULT = DeclSubprogramas.semantico_1(scopeManager.getCurrentScope(),d);
+					:} | declSubprogramas:ds declSubprograma:d {:
+							RESULT = DeclSubprogramas.semantico_2(scopeManager.getCurrentScope(),ds,d);
 					:};
-declSubprograma ::= declFunction {:
-						RESULT = new DeclSubprograma();
+declSubprograma ::= declFunction:f {:
+						RESULT = DeclSubprograma.semantico_fun(scopeManager.getCurrentScope(),f);
 					:}
-					| declProcedimiento{:
-						RESULT = new DeclSubprograma();
+					| declProcedimiento:p {:
+						RESULT = DeclSubprograma.semantico_proc(scopeManager.getCurrentScope(),p);
 					:};
 //-------------------------------------------------------------------------------------------------
 
@@ -280,22 +299,22 @@ declSubprograma ::= declFunction {:
 
 //DECLARACIÓN FUNCIÓN -----------------------------------------------------------------------------
 declFunction ::= FUNCTION IDENTIFICADOR:id PARENTESISAP declParametros:dps PARENTESISCIERRE RETURN tipoRetorno:t IS{:
-						RESULT = DeclFunction.semantico_parametros(scopeManager, semanticErrorManager, id.getLexema(), dps, t.getTipo());
+						DeclFunction.semantico_parametros(scopeManager, semanticErrorManager, id.getLexema(), dps, t.getTipo());
 					:}
                     declaracionesFunction
 					cuerpoFunction:c{:
 						c.comprobarIdEnd(scopeManager,semanticErrorManager);
 						c.comprobarReturns(scopeManager,semanticErrorManager);
-						scopeManager.closeScope();
+						RESULT = DeclFunction.codigoIntermedio(scopeManager,semanticErrorManager,c);
 					:} 	
 					| FUNCTION IDENTIFICADOR:id PARENTESISAP PARENTESISCIERRE RETURN tipoRetorno:t IS{:
-						RESULT = DeclFunction.semantico_sinParametros(scopeManager, semanticErrorManager, id.getLexema(), t.getTipo());
+						DeclFunction.semantico_sinParametros(scopeManager, semanticErrorManager, id.getLexema(), t.getTipo());
 					:}
 				    declaracionesFunction
 					cuerpoFunction:c{:
 						c.comprobarIdEnd(scopeManager,semanticErrorManager);
 						c.comprobarReturns(scopeManager,semanticErrorManager);
-						scopeManager.closeScope();
+						RESULT = DeclFunction.codigoIntermedio(scopeManager,semanticErrorManager,c);
 					:};	
 				
 declParametros ::= declParametro:dp DELIMPUNTOCOMA declParametros:dps{:
@@ -334,20 +353,20 @@ cuerpoFunction ::=  BEGIN
 
 //DECLARACIÓN PROCEDIMIENTO -----------------------------------------------------------------------
 declProcedimiento ::= PROCEDURE IDENTIFICADOR:id PARENTESISAP declParametros:dp PARENTESISCIERRE IS {:
-						RESULT = DeclProcedimiento.semantico_1(scopeManager, semanticErrorManager, dp, id.getLexema());
+						DeclProcedimiento.semantico_1(scopeManager, semanticErrorManager, dp, id.getLexema());
 						:}
                          declaracionesFunction
                          cuerpo:c{:
 							c.comprobarIdEnd(scopeManager, semanticErrorManager);
-							scopeManager.closeScope();
+							RESULT = DeclProcedimiento.codigoIntermedio(scopeManager,semanticErrorManager,c);
 						:}
                          | PROCEDURE IDENTIFICADOR:id PARENTESISAP PARENTESISCIERRE IS {:
-							RESULT = DeclProcedimiento.semantico_2(scopeManager, semanticErrorManager, id.getLexema());
+							DeclProcedimiento.semantico_2(scopeManager, semanticErrorManager, id.getLexema());
 						:}
                          declaracionesFunction
                          cuerpo:c{:
 							c.comprobarIdEnd(scopeManager, semanticErrorManager);
-							scopeManager.closeScope();
+							RESULT = DeclProcedimiento.codigoIntermedio(scopeManager,semanticErrorManager,c);
 						:};
 //-------------------------------------------------------------------------------------------------
 
@@ -454,7 +473,7 @@ expresion ::=       expresion:ex1 operadorLogico:op expresion:ex2 {:
                     expresionAccesoRegistro:ear {:
 						RESULT = Expresion.semantico_expresionAccesoRegistro(scopeManager,semanticErrorManager,ear);
 					:} | exprFuncion:exf {:
-						RESULT = Expresion.semantico_exprFuncion(exf);
+						RESULT = Expresion.semantico_exprFuncion(scopeManager,exf);
 					:} | operando:op {:
 						RESULT = Expresion.semantico_operando(op);
 					:}| 

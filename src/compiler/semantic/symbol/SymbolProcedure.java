@@ -40,6 +40,14 @@ public class SymbolProcedure
 	public void setListaParametros(ArrayList<SymbolParameter> listaParametros) {
 		this.listaParametros = listaParametros;
 	} 
+	
+	public int getSizeParametros() {
+		int sumatorio = 0;
+		for (SymbolParameter s:listaParametros) {
+			sumatorio += s.getType().getSize();
+		}
+		return sumatorio;
+	}
     
     
 }

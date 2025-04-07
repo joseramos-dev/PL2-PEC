@@ -42,7 +42,7 @@ public class SentenciaWhile extends NonTerminal{
 		cb.addQuadruples(s.getIntermediateCode()); 
 		cb.addQuadruple("BR", l1);
 		cb.addQuadruple("INL", l2);
-		
+		sw.setIntermediateCode(cb.create());
 		return sw;
 	}
 

@@ -1,15 +1,8 @@
-procedure testCase05 () is
-
-	resta: Integer;
+Procedure testRecursividad () is
 	x: Integer;
-	z: Integer;
 
 begin
-
-	x := 10;
-	z :=4;
-	resta := x - z;
-	Put_line("resultado resta =");
-	Put_line(resta);
-
-end testCase05;
+	Put_line("xd);
+	x:=4;
+	
+end testCase7;

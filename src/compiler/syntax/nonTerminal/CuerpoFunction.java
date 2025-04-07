@@ -59,13 +59,9 @@ public class CuerpoFunction extends NonTerminal{
 
 	public void comprobarIdEnd(ScopeManagerIF scopeManager, SemanticErrorManager sm) {
 		ScopeIF scope = scopeManager.getCurrentScope();
-		SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-		if (!tablaSimbolos.containsSymbol(idEnd)) {
+		String nombreScope = scope.getName();
+		if (!nombreScope.equals(idEnd)) {
 			sm.semanticFatalError("[CuerpoFunction] - El id del final ("+idEnd+") no esta contenido en la tabla de simbolos");
-		}
-		SymbolIF simbolo = tablaSimbolos.getSymbol(idEnd);
-		if (!(simbolo instanceof SymbolFunction) ) {
-			sm.semanticFatalError("[CuerpoFunction] - El id final ("+idEnd+") no corresponde con el de una funcion");
 		}
 	}
 	
@@ -74,12 +70,12 @@ public class CuerpoFunction extends NonTerminal{
 			SemanticErrorManager sm
 			) {
 		ScopeIF scope = scopeManager.getCurrentScope();
-		SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+		SymbolTableIF tablaSimbolos = scope.getParentScope().getSymbolTable();
 		SymbolIF simbolo = tablaSimbolos.getSymbol(idEnd);
 		if( !(simbolo.getType() instanceof TypeFunction ) ) {
 			sm.semanticFatalError("[CuerpoFunction] - El tipo de la funcion "+idEnd+" no es TypeFunction");
 		}
-		String tipo = ((TypeFunction)simbolo.getType()).getTipoRetorno();
+		String tipo = ((SymbolFunction)simbolo).getTipoRetorno();
 		for(String s : listaReturns) {
 			if(s != tipo) {
 				sm.semanticFatalError("[CuerpoFunction] - El tipo del return ("+s+") no coincide con "+tipo);

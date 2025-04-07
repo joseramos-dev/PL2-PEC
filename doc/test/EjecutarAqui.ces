@@ -1,15 +1,235 @@
-procedure testCase05 () is
+;Quadruple - [STARTGLOBAL null, null, null]
+MOVE .SP, .IX 
+PUSH #-1 
+PUSH .IX 
+PUSH .SR 
+PUSH .IX 
 
-	resta: Integer;
-	x: Integer;
-	z: Integer;
+;Quadruple - [VARGLOBAL a, 0, null]
+PUSH #0 
 
-begin
+;Quadruple - [VARGLOBAL b, 0, null]
+PUSH #0 
 
-	x := 10;
-	z :=4;
-	resta := x - z;
-	Put_line("resultado resta =");
-	Put_line(resta);
+;Quadruple - [VARGLOBAL z, 0, null]
+PUSH #0 
 
-end testCase05;
+;Quadruple - [PUNTEROGLOBAL T_20, 31, null]
+SUB .IX ,#31
+MOVE .A, .SP 
+
+;Quadruple - [WRITESTRING T_0, L_6, null]
+WRSTR /L_6
+WRCHAR #10
+
+;Quadruple - [MV T_2, 20, null]
+MOVE #20, #-9[.IX]
+
+;Quadruple - [MVA T_1, a, null]
+SUB .IX, #4
+MOVE .A, #-8[.IX]
+
+;Quadruple - [STP T_1, T_2, null]
+MOVE #-8[.IX], .R1
+MOVE #-9[.IX], [.R1]
+
+;Quadruple - [MV T_4, 2, null]
+MOVE #2, #-11[.IX]
+
+;Quadruple - [MVA T_3, b, null]
+SUB .IX, #5
+MOVE .A, #-10[.IX]
+
+;Quadruple - [STP T_3, T_4, null]
+MOVE #-10[.IX], .R1
+MOVE #-11[.IX], [.R1]
+
+;Quadruple - [STARTSUBPROGRAMA null, null, null]
+MOVE .SP, .R0
+PUSH #-1
+PUSH .R0
+PUSH .SR
+PUSH .IX
+
+;Quadruple - [MVP T_6, a, null]
+MOVE #-4[.IX], #-13[.IX] 
+
+;Quadruple - [PARAM T_6, null, null]
+PUSH #-13[.IX]
+
+;Quadruple - [MVP T_7, b, null]
+MOVE #-5[.IX], #-14[.IX] 
+
+;Quadruple - [PARAM T_7, null, null]
+PUSH #-14[.IX]
+
+;Quadruple - [CALL L_resta, null, null]
+MOVE .R0, .IX
+CALL /L_resta
+MOVE .IX, .SP
+
+;Quadruple - [VALORRETORNO T_8, null, null]
+MOVE .R9, #-15[.IX]
+
+;Quadruple - [MVA T_5, z, null]
+SUB .IX, #6
+MOVE .A, #-12[.IX]
+
+;Quadruple - [STP T_5, T_8, null]
+MOVE #-12[.IX], .R1
+MOVE #-15[.IX], [.R1]
+
+;Quadruple - [WRITESTRING T_9, L_8, null]
+WRSTR /L_8
+WRCHAR #10
+
+;Quadruple - [MVP T_10, z, null]
+MOVE #-6[.IX], #-17[.IX] 
+
+;Quadruple - [WRITEINT T_10, null, null]
+WRINT #-17[.IX]
+WRCHAR #10
+
+;Quadruple - [STARTSUBPROGRAMA null, null, null]
+MOVE .SP, .R0
+PUSH #-1
+PUSH .R0
+PUSH .SR
+PUSH .IX
+
+;Quadruple - [MVP T_12, a, null]
+MOVE #-4[.IX], #-19[.IX] 
+
+;Quadruple - [PARAM T_12, null, null]
+PUSH #-19[.IX]
+
+;Quadruple - [MVP T_13, b, null]
+MOVE #-5[.IX], #-20[.IX] 
+
+;Quadruple - [PARAM T_13, null, null]
+PUSH #-20[.IX]
+
+;Quadruple - [MV T_14, 1, null]
+MOVE #1, #-21[.IX]
+
+;Quadruple - [PARAM T_14, null, null]
+PUSH #-21[.IX]
+
+;Quadruple - [CALL L_resta2, null, null]
+MOVE .R0, .IX
+CALL /L_resta2
+MOVE .IX, .SP
+
+;Quadruple - [VALORRETORNO T_15, null, null]
+MOVE .R9, #-22[.IX]
+
+;Quadruple - [MVA T_11, z, null]
+SUB .IX, #6
+MOVE .A, #-18[.IX]
+
+;Quadruple - [STP T_11, T_15, null]
+MOVE #-18[.IX], .R1
+MOVE #-22[.IX], [.R1]
+
+;Quadruple - [WRITESTRING T_16, L_10, null]
+WRSTR /L_10
+WRCHAR #10
+
+;Quadruple - [MVP T_17, z, null]
+MOVE #-6[.IX], #-24[.IX] 
+
+;Quadruple - [WRITEINT T_17, null, null]
+WRINT #-24[.IX]
+WRCHAR #10
+
+;Quadruple - [WRITESTRING T_18, L_11, null]
+WRSTR /L_11
+WRCHAR #10
+
+;Quadruple - [MVP T_19, a, null]
+MOVE #-4[.IX], #-26[.IX] 
+
+;Quadruple - [WRITEINT T_19, null, null]
+WRINT #-26[.IX]
+WRCHAR #10
+
+;Quadruple - [HALT null, null, null]
+HALT
+
+;Quadruple - [CADENA SUBPROGRAMAS FUNCIONES, L_6, null]
+L_6: DATA "SUBPROGRAMAS FUNCIONES" 
+
+;Quadruple - [CADENA z: , L_8, null]
+L_8: DATA "z: " 
+
+;Quadruple - [CADENA z: , L_10, null]
+L_10: DATA "z: " 
+
+;Quadruple - [CADENA a: , L_11, null]
+L_11: DATA "a: " 
+
+;Quadruple - [ETIQUETA L_resta2, null, null]
+L_resta2: NOP
+
+;Quadruple - [PUNTEROSUBPROGRAMA T_3, 9, null]
+SUB .IX, #9
+MOVE .A, .SP
+
+;Quadruple - [MVP T_0, x, null]
+MOVE #-5[.IX], #-8[.IX] 
+
+;Quadruple - [MVP T_1, y, null]
+MOVE #-6[.IX], #-9[.IX] 
+
+;Quadruple - [SUB T_2, T_0, T_1]
+SUB #-8[.IX], #-9[.IX]
+MOVE .A, #-10[.IX]
+
+;Quadruple - [RETURN L_Fresta2, T_2, null]
+MOVE #-10[.IX], .R9
+BR /L_Fresta2
+
+;Quadruple - [FINSUBPROGRAMA L_Fresta2, 8, null]
+L_Fresta2:NOP
+SUB .IX, #8
+MOVE .A, .SP
+RET
+
+;Quadruple - [ETIQUETA L_resta, null, null]
+L_resta: NOP
+
+;Quadruple - [PUNTEROSUBPROGRAMA T_5, 11, null]
+SUB .IX, #11
+MOVE .A, .SP
+
+;Quadruple - [MV T_1, 5, null]
+MOVE #5, #-8[.IX]
+
+;Quadruple - [MVA T_0, x, null]
+SUB .IX, #4
+MOVE .A, #-7[.IX]
+
+;Quadruple - [STP T_0, T_1, null]
+MOVE #-7[.IX], .R1
+MOVE #-8[.IX], [.R1]
+
+;Quadruple - [MVP T_2, x, null]
+MOVE #-4[.IX], #-9[.IX] 
+
+;Quadruple - [MVP T_3, y, null]
+MOVE #-5[.IX], #-10[.IX] 
+
+;Quadruple - [SUB T_4, T_2, T_3]
+SUB #-9[.IX], #-10[.IX]
+MOVE .A, #-11[.IX]
+
+;Quadruple - [RETURN L_Fresta, T_4, null]
+MOVE #-11[.IX], .R9
+BR /L_Fresta
+
+;Quadruple - [FINSUBPROGRAMA L_Fresta, 7, null]
+L_Fresta:NOP
+SUB .IX, #7
+MOVE .A, .SP
+RET
+

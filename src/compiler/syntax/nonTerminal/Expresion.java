@@ -4,6 +4,7 @@ import es.uned.lsi.compiler.intermediate.IntermediateCodeBuilder;
 import es.uned.lsi.compiler.intermediate.TemporalFactory;
 import es.uned.lsi.compiler.intermediate.TemporalIF;
 import es.uned.lsi.compiler.semantic.ScopeIF;
+import es.uned.lsi.compiler.semantic.ScopeManager;
 import es.uned.lsi.compiler.semantic.ScopeManagerIF;
 import es.uned.lsi.compiler.semantic.SemanticErrorManager;
 
@@ -96,17 +97,25 @@ public class Expresion extends NonTerminal{
 				ExpresionAccesoRegistro ear
 			) {
 		Expresion ex = new Expresion();
+		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scopeManager.getCurrentScope());
+		cb.addQuadruples(ear.getIntermediateCode());
 		ex.setTipo(ear.getTipo(scopeManager,sm));
 		ex.setTemporal(ear.getTemporal());
-		ex.setIntermediateCode(ear.getIntermediateCode());
+		ex.setIntermediateCode(cb.create());
 		return ex;
 	}
 	
-	public static Expresion semantico_exprFuncion(ExprFuncion exf) {
+	public static Expresion semantico_exprFuncion(
+				ScopeManagerIF scopeManager,
+				ExprFuncion exf
+			) {
 		Expresion ex = new Expresion();
+		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scopeManager.getCurrentScope());
+		TemporalFactory tf = new TemporalFactory(scopeManager.getCurrentScope());
+		cb.addQuadruples(exf.getIntermediateCode());
 		ex.setTipo( exf.getTipoRetorno() );
 		ex.setTemporal(exf.getTemporal());
-		ex.setIntermediateCode(exf.getIntermediateCode());
+		ex.setIntermediateCode(cb.create());
 		return ex;
 	}
 	

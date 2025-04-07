@@ -42,11 +42,11 @@ public class ListaParametrosInvocacion extends NonTerminal{
 			) {
 		TemporalFactory tf = new TemporalFactory(scope);
 		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-		TemporalIF temp = tf.create();
-		cb.addQuadruples(lpi.getIntermediateCode());
+		TemporalIF temp = e.getTemporal();
 		cb.addQuadruples(e.getIntermediateCode());
 		cb.addQuadruple("PARAM",temp);
-		lpi.setIntermediateCode(cb.create());		
+		cb.addQuadruples(lpi.getIntermediateCode());
+		lpi.setIntermediateCode(cb.create());	
 		return lpi;
 	}
 

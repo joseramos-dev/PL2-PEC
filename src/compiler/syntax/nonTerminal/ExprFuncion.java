@@ -55,8 +55,8 @@ public class ExprFuncion extends NonTerminal{
 			sm.semanticFatalError("[ExprFuncion] - La función con identificador "+id+" no existe");
 		}
 		
-		
-		return codigoIntermedio(scopeManager, funcion, lpi, id);
+		//no deberia pasar por aqui
+		return funcion;
 	}
 	
 	private static ExprFuncion funcion(
@@ -88,7 +88,7 @@ public class ExprFuncion extends NonTerminal{
 		}
 		funcion.setProcedimiento(false);
 		funcion.setTipoRetorno(type.getTipoRetorno());
-		return funcion;
+		return codigoIntermedio(scopeManager, funcion, lpi, funcion.identificador);
 	}
 	private static ExprFuncion procedimiento(
 				ScopeManagerIF scopeManager,
@@ -116,7 +116,7 @@ public class ExprFuncion extends NonTerminal{
 			
 		}
 		funcion.setProcedimiento(true);
-		return funcion;
+		return codigoIntermedio(scopeManager, funcion, lpi, funcion.identificador);
 	}
 	
 	//CODIGO INTERMEDIO
@@ -136,7 +136,7 @@ public class ExprFuncion extends NonTerminal{
 		LabelIF l1 = lf.create(id);
 		cb.addQuadruple("CALL",l1);
 		SymbolIF simbolo = scopeManager.searchSymbol(id);
-		if(simbolo instanceof SymbolFunction) {
+		if(!exp.procedimiento) {
 			cb.addQuadruple("VALORRETORNO", temp);
 		}
 		exp.setIntermediateCode(cb.create());

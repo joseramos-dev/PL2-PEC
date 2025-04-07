@@ -115,11 +115,15 @@ public class ExecutionEnvironmentEns2001
 			break;
 		case "NQ": // Distinto (!=)
 			b.append("CMP " + o1 + ", " + o2+"\n");
-			b.append("BNZ " + r+"\n");
+			b.append("MOVE #-1, "+r+"\n");
+			b.append("BNZ $3\n");
+			b.append("MOVE #0, "+r);
 			break;
 		case "GR": // Mayor (>)
-			b.append("CMP " + o1 + ", " + o2+"\n");
-			b.append("BG " + r+"\n");
+			b.append("CMP " + o2 + ", " + o1+"\n");
+			b.append("MOVE #-1, "+r+"\n");
+			b.append("BN $3\n");
+			b.append("MOVE #0, "+r+"\n");
 			break;
 		case "AND": // Operación lógica AND
 			b.append("AND " + o1 + ", " + o2+"\n");
@@ -141,16 +145,18 @@ public class ExecutionEnvironmentEns2001
 			break;
 		case "WRITESTRING":
 			b.append("WRSTR /" + o1 +"\n");
+			b.append("WRCHAR #10\n");
 			break;
 		case "WRITEINT":
 			b.append("WRINT " + r +"\n");
+			b.append("WRCHAR #10\n");
 			break;
 		case "BR": // Salto incondicional
 			b.append("BR /" + r+"\n");
 			break;
 		case "BRF": // Salto si es falso
-			b.append("CMP " + r +"\n");
-			b.append("BP /" + o1+"\n");
+			b.append("ADD #0," + r +"\n");
+			b.append("BZ /" + o1+"\n");
 			break;
 		case "INL": // Insertar etiqueta
 			b.append(r + ": NOP \n");
@@ -176,8 +182,48 @@ public class ExecutionEnvironmentEns2001
 		case "CADENA":
             b.append(o1 + ": DATA \"" + r + "\" \n");
             break;
+		case "ETIQUETA":
+			b.append(r+": NOP\n");
+			break;
+		case "PUNTEROSUBPROGRAMA":
+			b.append("SUB .IX, "+o1+"\n");
+			b.append("MOVE .A, .SP\n");
+			break;
+		case "RETURN":
+			b.append("MOVE "+o1+", .R9\n");
+			b.append("BR /"+r+"\n");
+			break;
+		case "FINSUBPROGRAMA":
+			b.append(r+":NOP\n");
+			b.append("SUB .IX, "+o1+"\n");
+			b.append("MOVE .A, .SP\n");
+			b.append("RET\n");
+			break;
+		case "PARAM":
+			b.append("PUSH "+r+"\n");
+			//TODO: HAY QUE DIFERENCIAR CUANDO SE PASA POR VALOR O POR REFERENCIA
+			break;
+		case "CALL":
+			b.append("MOVE .R0, .IX\n");
+			b.append("CALL /"+r+"\n");
+			b.append("MOVE .IX, .SP\n");
+			break;
+		case "VALORRETORNO":
+			b.append("MOVE .R9, "+r+"\n");
+			break;
+		case "STARTSUBPROGRAMA":
+			b.append("MOVE .SP, .R0\n");
+			b.append("PUSH #-1\n");
+			b.append("PUSH .R0\n");
+			b.append("PUSH .SR\n");
+			b.append("PUSH .IX\n");
+			break;
+		case "VARSUBPROGRAMA":
+			b.append("PUSH #0\n");
+			break;
 		default:
-			b.append("; ERROR: Operación no reconocida: " + quadruple.getOperation() );
+			b.append("; ERROR: Operacion no reconocida: " + quadruple.getOperation() );
+			break;
 		}
 
 		return b.toString();

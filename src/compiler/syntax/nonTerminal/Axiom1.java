@@ -20,6 +20,7 @@ public class Axiom1 extends Axiom{
 			 ) {
 			Axiom1 a = new Axiom1();
 			IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			cb.addQuadruples(d.getIntermediateCode());
 			cb.addQuadruples(c.getIntermediateCode());
 			cb.addQuadruple("HALT");
 			cb.addQuadruples(listaCadenas);

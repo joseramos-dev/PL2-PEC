@@ -94,7 +94,19 @@ public class Operando extends NonTerminal{
 		TemporalIF temp = tf.create();
 		SymbolIF simbolo = scopeManager.searchSymbol(s);
 		if(simbolo instanceof SymbolConstant) {
-			Value valor = new Value(Integer.parseInt(((SymbolConstant)simbolo).getValor()));
+			int n = -1;
+			if(simbolo.getType().getName().equals("ENTERO")) {
+				n= Integer.parseInt(((SymbolConstant)simbolo).getValor());
+			}else {
+				if( (((SymbolConstant)simbolo).getValor()).equals("True")) {
+					n=1;
+				}else if((((SymbolConstant)simbolo).getValor()).equals("False")) {
+					n=0;
+				}else {
+					sm.semanticFatalError("[Operando] - El valor booleano introducido en la constante "+simbolo.getName()+" no es valido");
+				}
+			}
+			Value valor = new Value(n);
 			cb.addQuadruple("MV",temp,valor);
 		}else if(simbolo instanceof SymbolVariable || simbolo instanceof SymbolParameter) {
 			Variable var = new Variable(s,simbolo.getScope());

@@ -49,13 +49,9 @@ public class Cuerpo extends NonTerminal{
 
 	public void comprobarIdEnd(ScopeManagerIF scopeManager, SemanticErrorManager sm) {
 		ScopeIF scope = scopeManager.getCurrentScope();
-		SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-		if (!tablaSimbolos.containsSymbol(idEnd)) {
+		String nombreScope = scope.getName();
+		if (!nombreScope.equals(idEnd)) {
 			sm.semanticFatalError("[Cuerpo] - El id del final ("+idEnd+") no coincide con el del procedimiento");
-		}
-		SymbolIF simbolo = tablaSimbolos.getSymbol(idEnd);
-		if (!(simbolo instanceof SymbolProcedure) ) {
-			sm.semanticFatalError("[Cuerpo] - El id final ("+idEnd+") no corresponde con el de un procedimiento");
 		}
 		
 	}
